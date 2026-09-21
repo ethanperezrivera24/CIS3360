@@ -20,28 +20,31 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define MAX_N 9
-#define MAX_LEN 10000
+#define MAX_N 9     // Max rows/cols in 2D key array
+#define MAX_LEN 10000   // Max characters possible for plaintext
 
 int readKeyFile(const char *filename, int key[MAX_N][MAX_N], int *n);
 int readPlainTextFile(const char *filename, char plaintext[MAX_LEN], int *count);
 int hillCypher(char ciphertext[MAX_LEN], char plaintext[MAX_LEN], int key[MAX_N][MAX_N],int n, int count);
 
 int main(int argc, char *argv[]) {
+    // Check usage
     if(argc != 3) {
         printf("Usage: %s <keyfile> <plaintextfile>\n", argv[0]);
         return 1;
     }
 
+    // Save keyfile and plaintextfile
     char *keyfile = argv[1];
     char *plaintextfile = argv[2];
 
+    // Read keyfile & return non-zero if error
     int n;
     int key[MAX_N][MAX_N];
-
     if(readKeyFile(keyfile, key, &n) != 0)
         return 1;
     
+    // Print key matrix
     printf("\nKey matrix:\n");
     for(int i = 0; i < n; i++) {
         for(int j = 0; j < n; j++) {
@@ -50,11 +53,13 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+    // Read plaintextfile & return non-zero if error
     char plaintext[MAX_LEN];
     int plaintextCount;
     if(readPlainTextFile(plaintextfile, plaintext, &plaintextCount))
         return 1;
     
+    // Padding to finish n-sized blocks
     int rem = plaintextCount % n;
     if(rem != 0) {
         int pad = n - rem;
@@ -64,6 +69,7 @@ int main(int argc, char *argv[]) {
     }
 }
 
+    // Print plaintext with a new line every 80 characters
     printf("\nPlaintext:\n");
     for(int k = 0; k < plaintextCount; k++) {
         printf("%c", plaintext[k]);
@@ -72,9 +78,11 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
 
+    // Run cipher calculation on plaintext using key & store in new char array
     char ciphertext[MAX_LEN];
     hillCypher(ciphertext, plaintext, key, n, plaintextCount);
 
+    // Print ciphertext with a new line every 80 characters
     printf("\nCiphertext:\n");
     for(int t = 0; t < plaintextCount; t++) {
         printf("%c", ciphertext[t]);
@@ -86,6 +94,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+// Reads keyfile & populates 2D int key array & n
 int readKeyFile(const char *filename, int key[MAX_N][MAX_N], int *n) {
     FILE *fp = fopen(filename, "r");
     if(!fp) {
@@ -105,6 +114,7 @@ int readKeyFile(const char *filename, int key[MAX_N][MAX_N], int *n) {
     return 0;
 }
 
+// Reads plaintextfile & populates char array sized MAX_LEN & keeps track of # of characters
 int readPlainTextFile(const char *filename, char plaintext[MAX_LEN], int *count) {
     FILE *fp = fopen(filename, "r");
     if(!fp) {
@@ -128,6 +138,7 @@ int readPlainTextFile(const char *filename, char plaintext[MAX_LEN], int *count)
     return 0;
 }
 
+// Calculates encrypted text
 int hillCypher(char ciphertext[MAX_LEN], char plaintext[MAX_LEN], int key[MAX_N][MAX_N],int n, int plaintextCount) {
     for(int i = 0; i < plaintextCount; i += n) {
         for(int row = 0; row < n; row++) {
